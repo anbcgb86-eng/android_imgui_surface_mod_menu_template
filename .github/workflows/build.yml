@@ -1,31 +1,33 @@
-#include "imgui.h"
+name: Build Free Fire Mod Menu VIP
 
-void Main() {
-    ImGui::Begin("Mod Menu VIP - FF");
+on:
+  workflow_dispatch:
+  push:
+    branches: [ master, main ]
 
-    // Tạo hàng nút bấm chuyển Tab
-    static int tab = 0;
-    if (ImGui::Button("Combat", ImVec2(90, 35))) tab = 0; 
-    ImGui::SameLine();
-    if (ImGui::Button("Visual", ImVec2(90, 35))) tab = 1;
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-    ImGui::Separator();
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
 
-    // Tab Combat
-    if (tab == 0) {
-        static bool aimbot = false;
-        static bool aimHeadDrag = false;
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Make Gradle Executable
+      run: chmod +x ./gradlew
+
+    - name: Build Debug APK
+      run: ./gradlew assembleDebug --no-daemon
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: FreeFire_ModMenu_VIP_v4
+        path: app/build/outputs/apk/debug/*.apk
         
-        ImGui::Checkbox("Bật Aimbot", &aimbot);
-        if (aimbot) {
-            ImGui::Checkbox("Aim Head Drag (Kéo tâm vào đầu)", &aimHeadDrag);
-        }
-    } 
-    // Tab Visual
-    else if (tab == 1) {
-        static bool espBox = false;
-        ImGui::Checkbox("Vẽ hộp ESP", &espBox);
-    }
-
-    ImGui::End();
-}
