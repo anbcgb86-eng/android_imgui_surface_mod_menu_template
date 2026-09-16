@@ -1,4 +1,4 @@
-name: Build VIP Mod Menu APK
+name: Build Free Fire Mod Menu VIP
 
 on:
   workflow_dispatch:
@@ -10,28 +10,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout Code
+      uses: actions/checkout@v4
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Grant execute permission for gradlew
+    - name: Make Gradle Executable
       run: chmod +x ./gradlew
 
-    - name: Build with Gradle
+    - name: Build Debug APK
       run: ./gradlew assembleDebug --no-daemon
 
-    - name: Rename and Prepare APK
-      run: |
-        mkdir -p final_apk
-        cp app/build/outputs/apk/debug/*.apk final_apk/ModMenu_VIP_FreeFire.apk
-
-    - name: Upload VIP APK Artifact
-      uses: actions/upload-artifact@v3
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
       with:
-        name: FreeFire_ModMenu_VIP
-        path: final_apk/*.apk
+        name: FreeFire_ModMenu_VIP_v4
+        path: app/build/outputs/apk/debug/*.apk
         
