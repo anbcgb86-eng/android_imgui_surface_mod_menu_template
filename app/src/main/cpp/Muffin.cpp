@@ -1,43 +1,46 @@
-//
-// Created by Laughing Muffin on 18.09.2023
-//
-//======================================================================================================================
-#include <Globals.h>
-#include <Natives.h>
-#include <Hooks.h>
-//======================================================================================================================
-JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
+    ImGui::Begin("Mod Menu VIP - FF");
 
-    if (vm->GetEnv(reinterpret_cast<void **>(&global_env), JNI_VERSION_1_6) != JNI_OK) {
-        return -1;
-    }
+    // Tạo hàng nút bấm để chuyển Tab
+    static int tab = 0;
+    if (ImGui::Button("Combat", ImVec2(90, 35))) tab = 0; ImGui::SameLine();
+    if (ImGui::Button("Visual", ImVec2(90, 35))) tab = 1; ImGui::SameLine();
+    if (ImGui::Button("Misc", ImVec2(90, 35))) tab = 2;
 
-    if (registerNativeFunctions(global_env) != 0) {
-        return -1;
-    }
+    ImGui::Separator();
 
-    Debug_Log("| 1 | dl_open libinput");
-    void *g_Input = xdl_open(OBFUSCATE("libinput.so"), 0);
-    if (g_Input) {
-        Debug_Log("| 1 | pointer is 0x%08x", g_Input);
-        Debug_Log(
-                "| 1 | dl_sym _ZN7android13InputConsumer21initializeMotionEventEPNS_11MotionEventEPKNS_12InputMessageE");
-        void *inputSymbolPointer = (void *) xdl_sym(g_Input, OBFUSCATE(
-                "_ZN7android13InputConsumer21initializeMotionEventEPNS_11MotionEventEPKNS_12InputMessageE"),
-                                                    nullptr);
-        if (inputSymbolPointer) {
-            Debug_Log("| 1 | pointer is 0x%08x", inputSymbolPointer);
-            Debug_Log(
-                    "| 1 | hook _ZN7android13InputConsumer21initializeMotionEventEPNS_11MotionEventEPKNS_12InputMessageE");
-            MUFF(inputSymbolPointer, hook_Input, orig_Input);
+    // Nội dung Tab 1: Combat
+    if (tab == 0) {
+        static bool aimbot = false;
+        static bool aimHeadDrag = false; // Biến cho Aim head drag
+        static bool noRecoil = false;
+        static float fov = 90.0f;
+        
+        ImGui::Checkbox("Bật Aimbot", &aimbot);
+        if (aimbot) {
+            // Checkbox Aim head drag (chỉ hiện khi bật Aimbot)
+            ImGui::Checkbox("Aim Head Drag (Kéo tâm vào đầu)", &aimHeadDrag); 
+            ImGui::SliderFloat("Góc nhìn (FOV)", &fov, 0.0f, 360.0f);
         }
+        ImGui::Checkbox("Không giật (No Recoil)", &noRecoil);
+    } 
+    // Nội dung Tab 2: Visual
+    else if (tab == 1) {
+        static bool espLine = false;
+        static bool espBox = false;
+        
+        ImGui::Checkbox("Kẻ chỉ (ESP Line)", &espLine);
+        ImGui::Checkbox("Vẽ hộp (ESP Box)", &espBox);
+    } 
+    // Nội dung Tab 3: Misc
+    else if (tab == 2) {
+        static bool antiBan = true;
+        static bool godMode = false;
+        
+        ImGui::Checkbox("Anti-Ban (Bảo vệ nick)", &antiBan);
+        ImGui::Checkbox("Bất tử", &godMode);
+        
+        ImGui::Spacing();
+        ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Trạng thái: An toàn!");
     }
-    Debug_Log("| 1 | dl_close libinput");
-    xdl_close(g_Input);
 
-    // setup path once
-    setupConfigFile();
-
-    return JNI_VERSION_1_6;
-}
-//======================================================================================================================
+    ImGui::End();
